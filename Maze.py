@@ -19,110 +19,112 @@ class Graph:
         self.graph = {}
         self.invertedGraph = {}
     
-    # Creates list of arrows that can be moved to from the perspective of each arrow
-    # Also does this for the graph when the directions are inverted
-    def build_graph(self, maze):
-        # Adds each opposite colored arrow the current arrow points to to the vertex list
-        # For each arrow
-        for i in range(self.rows):
-            for j in range(self.columns):
-                arrowTargets = []
-                invertedTargets = []
-                currentArrow = maze[i][j]
+# Creates list of arrows that can be moved to from the perspective of each arrow
+# Also does this for the graph when the directions are inverted
+def build_graph(rows, columns, maze):
+    graph = {}
+    # Adds each opposite colored arrow the current arrow points to to the vertex list
+    # For each arrow
+    for i in range(rows):
+        for j in range(columns):
+            arrowTargets = []
+            invertedTargets = []
+            currentArrow = maze[i][j]
 
-                # If the arrow points east
-                if currentArrow.direction == 'E':
-                    # Check each arrow in the row
-                    for arrow in maze[i]:
-                        # If the colors don't match, add to that arrow's pointing list
-                        if arrow.color != currentArrow.color and arrow.column > currentArrow.column:
-                            arrowTargets.append(arrow)
-                    self.graph[currentArrow] = arrowTargets
-                
-                # If the arrow points west
-                elif currentArrow.direction == 'W':
-                    # Check each arrow in the row
-                    for arrow in maze[i]:
-                        # If the colors don't match, add to that arrow's pointing list
-                        if arrow.color != currentArrow.color and arrow.column < currentArrow.column:
-                            arrowTargets.append(arrow)
-                    self.graph[currentArrow] = arrowTargets
+            # If the arrow points east
+            if currentArrow.direction == 'E':
+                # Check each arrow in the row
+                for arrow in maze[i]:
+                    # If the colors don't match, add to that arrow's pointing list
+                    if arrow.color != currentArrow.color and arrow.column > currentArrow.column:
+                        arrowTargets.append(arrow)
+                graph[currentArrow] = arrowTargets
+            
+            # If the arrow points west
+            elif currentArrow.direction == 'W':
+                # Check each arrow in the row
+                for arrow in maze[i]:
+                    # If the colors don't match, add to that arrow's pointing list
+                    if arrow.color != currentArrow.color and arrow.column < currentArrow.column:
+                        arrowTargets.append(arrow)
+                graph[currentArrow] = arrowTargets
 
-                # If the arrow points north
-                elif currentArrow.direction == 'N':
-                    # Check each arrow in the column
-                    for z in range(self.columns):
-                        arrow = maze[z][j]
-                        # If the colors don't match, add to that arrow's pointing list
-                        if arrow.color != currentArrow.color and arrow.row < currentArrow.row:
-                            arrowTargets.append(arrow)
-                    self.graph[currentArrow] = arrowTargets
+            # If the arrow points north
+            elif currentArrow.direction == 'N':
+                # Check each arrow in the column
+                for z in range(columns):
+                    arrow = maze[z][j]
+                    # If the colors don't match, add to that arrow's pointing list
+                    if arrow.color != currentArrow.color and arrow.row < currentArrow.row:
+                        arrowTargets.append(arrow)
+                graph[currentArrow] = arrowTargets
 
-                # If the current arrow points south
-                elif currentArrow.direction == 'S':
-                    # Check each arrow in the column
-                    for z in range(self.columns):
-                        arrow = maze[z][j]
-                        # If the colors don't match, add to that arrow's pointing list
-                        if arrow.color != currentArrow.color and arrow.row > currentArrow.row:
-                            arrowTargets.append(arrow)
-                    self.graph[currentArrow] = arrowTargets
+            # If the current arrow points south
+            elif currentArrow.direction == 'S':
+                # Check each arrow in the column
+                for z in range(columns):
+                    arrow = maze[z][j]
+                    # If the colors don't match, add to that arrow's pointing list
+                    if arrow.color != currentArrow.color and arrow.row > currentArrow.row:
+                        arrowTargets.append(arrow)
+                graph[currentArrow] = arrowTargets
 
-                # If the current arrow points northeast
-                elif currentArrow.direction == 'NE':
-                    # Check each arrow in the diagonal it points to
-                    k = j
-                    for z in range(i,-1,-1):
-                        if k >= self.columns:
-                            continue
-                        arrow = maze[z][k]
-                        k += 1
-                        # If the colors don't match, add to that arrow's pointing
-                        if arrow.color != currentArrow.color and arrow.row < currentArrow.row and arrow.column > currentArrow.column:
-                            arrowTargets.append(arrow)
-                    self.graph[currentArrow] = arrowTargets
+            # If the current arrow points northeast
+            elif currentArrow.direction == 'NE':
+                # Check each arrow in the diagonal it points to
+                k = j
+                for z in range(i,-1,-1):
+                    if k >= columns:
+                        continue
+                    arrow = maze[z][k]
+                    k += 1
+                    # If the colors don't match, add to that arrow's pointing
+                    if arrow.color != currentArrow.color and arrow.row < currentArrow.row and arrow.column > currentArrow.column:
+                        arrowTargets.append(arrow)
+                graph[currentArrow] = arrowTargets
 
-                # If the current arrow points northwest
-                elif currentArrow.direction == 'NW':
-                    # Check each arrow in the diagonal it points to
-                    k = j
-                    for z in range(i,-1,-1):
-                        if k >= self.columns:
-                            continue
-                        arrow = maze[z][k]
-                        k += -1
-                        # If the colors don't match, add to that arrow's pointing list
-                        if arrow.color != currentArrow.color and arrow.row < currentArrow.row and arrow.column < currentArrow.column:
-                            arrowTargets.append(arrow)
-                    self.graph[currentArrow] = arrowTargets
+            # If the current arrow points northwest
+            elif currentArrow.direction == 'NW':
+                # Check each arrow in the diagonal it points to
+                k = j
+                for z in range(i,-1,-1):
+                    if k >= columns:
+                        continue
+                    arrow = maze[z][k]
+                    k += -1
+                    # If the colors don't match, add to that arrow's pointing list
+                    if arrow.color != currentArrow.color and arrow.row < currentArrow.row and arrow.column < currentArrow.column:
+                        arrowTargets.append(arrow)
+                graph[currentArrow] = arrowTargets
 
-                # If the current arrow points southwest
-                elif currentArrow.direction == 'SW':
-                    # Check each arrow in the diagonal it points to
-                    z = i
-                    for k in range(j,-1,-1):
-                        if z >= self.rows:
-                            continue
-                        arrow = maze[z][k]
-                        z += 1
-                        # If the colors don't match, add to that arrow's pointing list
-                        if arrow.color != currentArrow.color and arrow.row > currentArrow.row and arrow.column < currentArrow.column:
-                            arrowTargets.append(arrow)
-                    self.graph[currentArrow] = arrowTargets
+            # If the current arrow points southwest
+            elif currentArrow.direction == 'SW':
+                # Check each arrow in the diagonal it points to
+                z = i
+                for k in range(j,-1,-1):
+                    if z >= rows:
+                        continue
+                    arrow = maze[z][k]
+                    z += 1
+                    # If the colors don't match, add to that arrow's pointing list
+                    if arrow.color != currentArrow.color and arrow.row > currentArrow.row and arrow.column < currentArrow.column:
+                        arrowTargets.append(arrow)
+                graph[currentArrow] = arrowTargets
 
-                # If the current arrow points southeast
-                elif currentArrow.direction == 'SE':
-                    # Check each arrow in the diagonal it points to
-                    z = i
-                    for k in range(j,self.columns):
-                        if z >= self.rows:
-                            continue
-                        arrow = maze[z][k]
-                        z += 1
-                        # If the colors don't match, add to that arrow's pointing list
-                        if arrow.color != currentArrow.color and arrow.row > currentArrow.row and arrow.column > currentArrow.column:
-                            arrowTargets.append(arrow)
-                    self.graph[currentArrow] = arrowTargets
+            # If the current arrow points southeast
+            elif currentArrow.direction == 'SE':
+                # Check each arrow in the diagonal it points to
+                z = i
+                for k in range(j,columns):
+                    if z >= rows:
+                        continue
+                    arrow = maze[z][k]
+                    z += 1
+                    # If the colors don't match, add to that arrow's pointing list
+                    if arrow.color != currentArrow.color and arrow.row > currentArrow.row and arrow.column > currentArrow.column:
+                        arrowTargets.append(arrow)
+                graph[currentArrow] = arrowTargets
+    return graph
 
 # Function that reads in contents of the maze file
 def initialize_maze():
@@ -152,7 +154,7 @@ def initialize_maze():
             mazeLayout[i][j] = arrow
     
     fMaze.close()
-    graph.build_graph(mazeLayout)
+    graph.graph = build_graph(rows, columns, mazeLayout)
     return graph
 
 def invertDirection(direction):
@@ -179,3 +181,6 @@ def invertDirection(direction):
     return invert
 
 maze = initialize_maze()
+for f in maze.graph:
+    for g in maze.graph[f]:
+        print(g.row,g.column)
