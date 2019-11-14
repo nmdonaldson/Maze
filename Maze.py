@@ -40,7 +40,7 @@ def build_graph(rows, columns, maze):
                         arrowTargets.append(arrow)
                 graph[currentArrow] = arrowTargets
             
-            # If the arrow points west
+           # If the arrow points west
             elif currentArrow.direction == 'W':
                 # Check each arrow in the row
                 for arrow in maze[i]:
@@ -141,9 +141,10 @@ def initialize_maze():
     columns = int(firstLineInfo[1])
     graph = Graph(rows, columns)
 
-    # 2D list that contains each arrow node
-    # Used for creating adjacency lists for the actual graph (a dictionary)
+    # 2D lists that contains each arrow node
+    # Used for creating adjacency lists for the actual graphs (dictionary)
     mazeLayout = [[0 for i in range(columns)] for j in range(rows)]
+    inverseLayout = [[0 for i in range(columns)] for j in range(rows)]
 
     # Reads in the rest of the file into 2D list
     for i in range(rows):
@@ -151,10 +152,13 @@ def initialize_maze():
             line = fMaze.readline()
             aspects = line.rstrip('\n').split(" ")
             arrow = Arrow(int(aspects[0]), int(aspects[1]), aspects[2], aspects[3], aspects[4])
+            inverseArrow = Arrow(int(aspects[0]), int(aspects[1]), aspects[2], aspects[3], invertDirection(aspects[4]))
             mazeLayout[i][j] = arrow
+            inverseLayout[i][j] = inverseArrow
     
     fMaze.close()
-    graph.graph = build_graph(rows, columns, mazeLayout)
+    #graph.graph = build_graph(rows, columns, mazeLayout)
+    graph.invertedGraph = build_graph(rows, columns, inverseLayout)
     return graph
 
 def invertDirection(direction):
@@ -181,6 +185,3 @@ def invertDirection(direction):
     return invert
 
 maze = initialize_maze()
-for f in maze.graph:
-    for g in maze.graph[f]:
-        print(g.row,g.column)
