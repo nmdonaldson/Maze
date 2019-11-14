@@ -155,11 +155,27 @@ def initialize_maze():
     graph.build_graph(mazeLayout)
     return graph
 
+def invertDirection(direction):
+    invert = ""
 
+    # Inverts the input direction
+    if direction == 'E':
+        invert = 'W'
+    elif direction == 'N':
+        invert = 'S'
+    elif direction == 'S':
+        invert = 'N'
+    elif direction == 'W':
+        invert = 'E'
+    elif direction == 'NE':
+        invert = 'SW'
+    elif direction == 'NW':
+        invert = 'SE'
+    elif direction == 'SE':
+        invert = 'NW'
+    elif direction == 'SW':
+        invert = 'NE'
+    
+    return invert
 
 maze = initialize_maze()
-
-# print("-------------------------------")
-# for poop in maze.invertedGraph:
-#     for pee in maze.invertedGraph[poop]:
-#        print(pee.row, pee.column)
