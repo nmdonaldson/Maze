@@ -1,4 +1,4 @@
-# Arrow class, acts as the vertices for the graph
+# Acts as the vertices for the graph
 class Arrow:
     # Constructor
     def __init__(self, row, column, color, circle, direction):
@@ -8,19 +8,59 @@ class Arrow:
         self.color = color
         self.circle = circle
         self.direction = direction
-        # Used for DFS algorithm
-        self.DFSColor = "W"
+        self.parent = None
 
-# Graph class, contains a list of the arrows 
+# Contains a dictionary of the arrows and the other arrows
+# They point to and away from
 class Graph:
     # Constructor, defines the size of the graph
     def __init__(self, rows, columns):
         super().__init__()
-        self.rows = rows
-        self.columns = columns
         self.graph = {}
-        self.reverse = False
-    
+        self.rows = rows
+        self.cols = columns
+
+    # Performs BFS search to find solution
+    def BFS_search(self):
+        # Queue used for BFS
+        BFS_Q = []
+
+        # Adds first arrow to the queue
+        BFS_Q.append(list(self.graph.keys())[0])
+
+        # Specifies what direction to head in
+        reverse = 0
+
+        path = []
+
+        # While the queue is not empty, keep searching
+        while (len(BFS_Q) != 0):
+            # Dequeue a vertex from the queue
+            vertex = BFS_Q.pop(0)
+
+            print('(',vertex.row,',',vertex.column, ')',sep='',end=' ')
+
+            # If the chosen vertex is a circle arrow, reverse directions
+            if vertex.circle == 'C':
+                if reverse == 0:
+                    reverse = 1
+                elif reverse == 1:
+                    reverse = 0
+            # If the vertex's circle state is X, you've reached the end
+            elif vertex.circle == 'X':
+                path = []
+                # while vertex.parent != None or vertex == list(self.graph.keys())[0]:
+                #     path.append(vertex)
+                #     vertex = vertex.parent
+                return vertex
+
+            # Get the vertex's target vertices and add them to the queue
+            # Targets are determined by direction
+            for target in self.graph[vertex][reverse]:
+                target.parent = vertex
+                BFS_Q.append(target)
+
+
 # Creates list of arrows that can be moved to from the perspective of each arrow
 # Also does this for the graph when the directions are inverted
 def build_graph(rows, columns, maze):
@@ -43,7 +83,7 @@ def build_graph(rows, columns, maze):
                     elif arrow.color != currentArrow.color and arrow.column < currentArrow.column:
                         reverseTargets.append(arrow)
                 graph[currentArrow] = [arrowTargets, reverseTargets]
-            
+
             # If the arrow points west
             elif currentArrow.direction == 'W':
                 # Check each arrow in the row
@@ -75,8 +115,8 @@ def build_graph(rows, columns, maze):
                     # If the colors don't match, add to that arrow's pointing list
                     if arrow.color != currentArrow.color and arrow.row > currentArrow.row:
                         arrowTargets.append(arrow)
-                    if arrow.color != currentArrow.color and arrow.row < currentArrow.row:
-                        arrowTargets.append(arrow)
+                    elif arrow.color != currentArrow.color and arrow.row < currentArrow.row:
+                        reverseTargets.append(arrow)
                 graph[currentArrow] = [arrowTargets, reverseTargets]
 
             # If the current arrow points northeast
@@ -180,7 +220,6 @@ def build_graph(rows, columns, maze):
                 graph[currentArrow] = [arrowTargets, reverseTargets]
     return graph
 
-
 # Function that reads in contents of the maze file
 def initialize_maze():
     rows = 0
@@ -207,51 +246,17 @@ def initialize_maze():
             aspects = line.rstrip('\n').split(" ")
             arrow = Arrow(int(aspects[0]), int(aspects[1]), aspects[2], aspects[3], aspects[4])
             mazeLayout[i][j] = arrow
-    
+
     fMaze.close()
     graph.graph = build_graph(rows, columns, mazeLayout)
     return graph
 
-# Takes a direction string and switches it to its opposite
-def invertDirection(direction):
-    invert = ""
 
-    # Inverts the input direction
-    if direction == 'E':
-        invert = 'W'
-    elif direction == 'N':
-        invert = 'S'
-    elif direction == 'S':
-        invert = 'N'
-    elif direction == 'W':
-        invert = 'E'
-    elif direction == 'NE':
-        invert = 'SW'
-    elif direction == 'NW':
-        invert = 'SE'
-    elif direction == 'SE':
-        invert = 'NW'
-    elif direction == 'SW':
-        invert = 'NE'
-    
-    return invert
-
-# Maze solving algorithm that uses DFS
-# def search_maze(Graph):
-#     path = []
-#     reverse = False
-#     # Looks at each arrow in the path of the current arrow
-#     for arrow in Graph.graph:
-#         if (arrow.DFSColor == 'W'):
-#             visit_arrow(arrow, Graph, path, reverse)
-#     return path
-
-# # Visits an arrow and marks its adjacents as grey
-# def visit_arrow(Arrow, Graph, path, reverse):
-#     # Visit each unvisited arrow recursively
-#     for adjArrow in Graph.graph[Arrow]:
-#     Arrow.DFSColor = 'B'
-
-
-
+# Setup and maze search
 maze = initialize_maze()
+pathTaken = maze.BFS_search()
+print("Hanzo sucks")
+
+# # Prints the steps taken through the maze
+# for i in range(len(pathTaken)-1, -1, -1):
+#     print('(', pathTaken.row, ',', pathTaken.column, ')', sep = '', end = ' ')
