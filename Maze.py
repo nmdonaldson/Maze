@@ -1,9 +1,15 @@
 # Author: Nolan Donaldson
 # Maze project
 
-# Acts as the vertices for the graph
+# Used to store extra information during BFS search
+class vertex:
+    def __init__(self, color, parent):
+        self.color = color
+        self.parent = parent
+
+
+# Acts as the 'vertices' for the maze layout
 class Arrow:
-    # Constructor
     def __init__(self, row, column, color, circle, direction):
         super().__init__()
         self.row = row
@@ -27,6 +33,8 @@ def build_graph(rows,cols,maze):
         'X' : (rows,cols)
     }
     # Key: Each arrow | Value: list of the valid moves in the arrow's path
+    # Graph consists of two distinct halves: the normal half and the transpose one
+    # These are connected by the circle arrow nodes
     graph = {}
     # Looks through the maze layout and creates the graph
     for currentRow in range(rows):
@@ -37,13 +45,14 @@ def build_graph(rows,cols,maze):
             # translateX, Y represent translations of x and y depending on the arrow's head direction
             translateX, translateY = directions[maze[currentRow][currentCol].direction]
 
-            # node = tuple describing the location of each arrow
+            # node = tuple describing the location of each arrow, its color, and its parent
             # Coordinates are negative if it's a circle arrow, positive otherwise
             if maze[currentRow][currentCol].circle == 'C':
                 node = (-(currentRow+1),-(currentCol+1))
             else:
                 node = (currentRow+1,currentCol+1)
             
+            # Creates key for node in the graph dictionary
             graph[node] = set()
 
             # Creates the graph, adding the nodes in the path of the current arrow
@@ -52,7 +61,7 @@ def build_graph(rows,cols,maze):
                 x += translateX
                 y += translateY
                 if maze[y][x].color != maze[currentRow][currentCol].color:
-                    graph[node].add((y+1, x+1))
+                    graph[node].add((y+1,x+1))
             
             # Reverses the node's direction (for the inverse nodes)
             if maze[currentRow][currentCol].circle == 'C':
@@ -69,7 +78,7 @@ def build_graph(rows,cols,maze):
                 x -= translateX
                 y -= translateY
                 if maze[y][x].color != maze[currentRow][currentCol].color:
-                    graph[node].add((-(y+1), -(x+1)))
+                    graph[node].add((-(y+1),-(x+1)))
     return graph
 
 # Function that reads in contents of the maze file
@@ -103,6 +112,43 @@ def initialize_graph():
 
 
 
+# BFS for the maze
+def BFS(graph):
+    queue = []
+    vertStore = {}
+
+    for arrow in graph:
+        vertStore[arrow] = vertex('W', None)
+
+    queue.append((1, 1))
+
+    while len(queue) > 0:
+        u = queue.pop()
+        for target in graph[u]:
+            if vertStore[target].color == 'W':
+                vertStore[target].color = 'G'
+                vertStore[target].parent = u
+                if target == (7, 7):
+                    return vertStore
+                queue.append(target)
+        vertStore[u].color = 'B'
+
+
+
 # Setup and maze search
 graph = initialize_graph()
-print("Widow is a 'fun' hero")
+path = BFS(graph)
+
+pathTaken = []
+
+# Gets finish space
+traveled = sorted(path.keys())[-1]
+
+# Gets the path taken by the maze algorithm
+while traveled != None:
+    pathTaken.append(traveled)
+    traveled = path[traveled].parent
+
+# Follows the parent of each node starting from the end to get the path taken
+for i in range(len(pathTaken)-1,-1,-1):
+    print('(', abs(pathTaken[i][0]), ',', abs(pathTaken[i][1]), ')',sep='',end=' ')
