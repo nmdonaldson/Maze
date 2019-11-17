@@ -1,3 +1,6 @@
+# Author: Nolan Donaldson
+# Maze project
+
 # Acts as the vertices for the graph
 class Arrow:
     # Constructor
@@ -28,28 +31,45 @@ def build_graph(rows,cols,maze):
     # Looks through the maze layout and creates the graph
     for currentRow in range(rows):
         for currentCol in range(cols):
-            # node = tuple describing the location of each arrow
-            node = (currentRow+1,currentCol+1)
+            # Represents coordinates used to find each node's targets
             y, x = currentRow,currentCol
-            graph[node] = []
-            # dx and dy represent translations of x and y depending on
-            # the arrow's head direction
+
+            # translateX, Y represent translations of x and y depending on the arrow's head direction
             translateX, translateY = directions[maze[currentRow][currentCol].direction]
+
+            # node = tuple describing the location of each arrow
+            # Coordinates are negative if it's a circle arrow, positive otherwise
+            if maze[currentRow][currentCol].circle == 'C':
+                node = (-(currentRow+1),-(currentCol+1))
+            else:
+                node = (currentRow+1,currentCol+1)
+            
+            graph[node] = set()
+
             # Creates the graph, adding the nodes in the path of the current arrow
-            # To that node's adjacency list (If they are the opposite color)
+            # To that node's adjacency list (if they are the opposite color)
             while 0 <= y + translateY < rows and 0 <= x + translateX < cols:
                 x += translateX
                 y += translateY
                 if maze[y][x].color != maze[currentRow][currentCol].color:
                     graph[node].add((y+1, x+1))
+            
+            # Reverses the node's direction (for the inverse nodes)
+            if maze[currentRow][currentCol].circle == 'C':
+                node = (currentRow+1,currentCol+1)
+            else:
+                node = (-(currentRow+1),-(currentCol+1))
+            
             # Resets x and y
             y, x = currentRow,currentCol
+            graph[node] = set()
             # Does the same, but for the nodes in the path of the arrow's tail
+            # Adds the nodes as negatives (to separate them from the normal ones)
             while 0 <= y - translateY < rows and 0 <= x - translateX < cols:
                 x -= translateX
                 y -= translateY
                 if maze[y][x].color != maze[currentRow][currentCol].color:
-                    graph[node].add((y+1, x+1))
+                    graph[node].add((-(y+1), -(x+1)))
     return graph
 
 # Function that reads in contents of the maze file
@@ -80,6 +100,7 @@ def initialize_graph():
 
     fMaze.close()
     return build_graph(rows, columns, mazeLayout)
+
 
 
 # Setup and maze search
