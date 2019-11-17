@@ -42,10 +42,10 @@ def build_graph(rows,cols,maze):
     for currentRow in range(rows):
         for currentCol in range(cols):
             # Represents coordinates used to find each node's targets
-            y, x = currentRow,currentCol
+            y,x = currentRow,currentCol
 
             # translateX, Y represent translations of x and y depending on the arrow's head direction
-            translateX, translateY = directions[maze[currentRow][currentCol].direction]
+            translateX,translateY = directions[maze[currentRow][currentCol].direction]
 
             # node = tuple describing the location of each arrow
             # Coordinates are negative if it's a circle arrow, positive otherwise
@@ -59,7 +59,7 @@ def build_graph(rows,cols,maze):
             graph[node] = set()
 
             # Creates the graph, adding the nodes in the path of the current arrow
-            # To that node's adjacency list (if they are the opposite color)
+            # to that node's adjacency list (if they are the opposite color)
             while 0 <= y + translateY < rows and 0 <= x + translateX < cols:
                 x += translateX
                 y += translateY
@@ -125,8 +125,10 @@ def BFS(graph):
     for arrow in graph:
         vertStore[arrow] = vertex('W', None)
     
-    # Adds start space to queue
-    queue.append((1, 1))
+    # Adds start space to queue, defines end space
+    queue.append(list(graph.keys())[0])
+    antiEnd = list(graph.keys())[-1]
+    end = (-antiEnd[0],-antiEnd[1])
 
     # Main BFS loop
     while len(queue) > 0:
@@ -141,7 +143,7 @@ def BFS(graph):
                 vertStore[target].color = 'G'
                 vertStore[target].parent = u
                 # If the target being looked at is the end, you're done
-                if target == (7, 7):
+                if target == end or target == antiEnd:
                     return vertStore
                 # Otherwise, 
                 queue.append(target)
