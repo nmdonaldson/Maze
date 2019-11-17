@@ -32,10 +32,12 @@ def build_graph(rows,cols,maze):
         'NW': (-1,-1),
         'X' : (rows,cols)
     }
+
     # Key: Each arrow | Value: list of the valid moves in the arrow's path
-    # Graph consists of two distinct halves: the normal half and the transpose one
+    # Graph consists of two distinct halves: the normal half and the transpose half
     # These are connected by the circle arrow nodes
     graph = {}
+
     # Looks through the maze layout and creates the graph
     for currentRow in range(rows):
         for currentCol in range(cols):
@@ -45,8 +47,9 @@ def build_graph(rows,cols,maze):
             # translateX, Y represent translations of x and y depending on the arrow's head direction
             translateX, translateY = directions[maze[currentRow][currentCol].direction]
 
-            # node = tuple describing the location of each arrow, its color, and its parent
+            # node = tuple describing the location of each arrow
             # Coordinates are negative if it's a circle arrow, positive otherwise
+            # This allows the circle arrows to have adjacency lists of nodes inverse to themselves
             if maze[currentRow][currentCol].circle == 'C':
                 node = (-(currentRow+1),-(currentCol+1))
             else:
@@ -72,7 +75,8 @@ def build_graph(rows,cols,maze):
             # Resets x and y
             y, x = currentRow,currentCol
             graph[node] = set()
-            # Does the same, but for the nodes in the path of the arrow's tail
+
+            # Does the same as before, but for the nodes in the path of the arrow's tail
             # Adds the nodes as negatives (to separate them from the normal ones)
             while 0 <= y - translateY < rows and 0 <= x - translateX < cols:
                 x -= translateX
@@ -117,20 +121,31 @@ def BFS(graph):
     queue = []
     vertStore = {}
 
+    # Initializes vertex attributes
     for arrow in graph:
         vertStore[arrow] = vertex('W', None)
-
+    
+    # Adds start space to queue
     queue.append((1, 1))
 
+    # Main BFS loop
     while len(queue) > 0:
+        # Pops node from the queue
         u = queue.pop()
+        # Checks each target of the node u
         for target in graph[u]:
+            # Checks if the target node is undiscovered ('W')
+            # If it is, add it to the queue and mark it as discovered ('G')
+            # Also marks u as its parent node
             if vertStore[target].color == 'W':
                 vertStore[target].color = 'G'
                 vertStore[target].parent = u
+                # If the target being looked at is the end, you're done
                 if target == (7, 7):
                     return vertStore
+                # Otherwise, 
                 queue.append(target)
+        # Marks u as finished ('B')
         vertStore[u].color = 'B'
 
 
